@@ -15,7 +15,7 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
-      ReeiverID: {
+      ReceiverID: {
         type: Sequelize.INTEGER,
         allowNull: false,
       },

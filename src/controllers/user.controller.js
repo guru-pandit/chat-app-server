@@ -70,3 +70,8 @@ exports.login = async (req, res) => {
         return res.status(500).send({ error: err.message || "Something went wrong" })
     })
 }
+
+// Get user details from their ID
+exports.getUserByID = async (req, res) => {
+
+}

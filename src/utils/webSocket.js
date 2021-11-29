@@ -1,4 +1,4 @@
-const { updateConnectionBySocketID } = require("../commonMethods/commonMethods");
+const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser } = require("../commonMethods/commonMethods");
 
 const connection = (client) => {
     console.log("ConnectedClientID:- ", client.id);
@@ -15,9 +15,15 @@ const connection = (client) => {
     })
 
     // on message
-    client.on("message", (msg) => {
-        global.io.emit("message", msg);
+    client.on("message", async (msg) => {
         console.log("Message:- ", msg);
+        let socketid = await getSocketIDOfUser(msg.receiverID);
+        await createChatMessage(msg).then((data) => {
+            global.io.to(socketid).emit("message", data);
+            console.log("CreateChatMessage-data:- ", JSON.stringify(data));
+        }).catch((err) => {
+            console.log("CreateChatMessage-err:- ", err);
+        })
     })
 
 }
