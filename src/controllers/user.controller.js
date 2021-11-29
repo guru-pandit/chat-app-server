@@ -2,6 +2,7 @@ const { User } = require("../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
+const { getSocketIDOfUser } = require("../commonMethods/commonMethods");
 
 // Funtion to register the user
 exports.register = async (req, res) => {
@@ -73,5 +74,28 @@ exports.login = async (req, res) => {
 
 // Get user details from their ID
 exports.getUserByID = async (req, res) => {
+    console.log("GetUserByID-req.params:- ", req.params);
+    await User.findOne({
+        where: {
+            id: req.params.id,
+            [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }],
+        }
+    }).then(async (result) => {
+        console.log("GetUserByID-result:- ", JSON.stringify(result));
+        if (result != null) {
+            let socketid = await getSocketIDOfUser(result.id)
+            let responseBody = {
+                id: result.id,
+                name: result.Name,
+                phone: result.Phone,
+                socketID: socketid
+            }
+            res.send(responseBody);
 
+        } else {
+            res.status(400).send({ error: "No user found..." });
+        }
+    }).catch((err) => {
+        res.status(500).send({ error: err.message || "Something went wrong" });
+    });
 }
