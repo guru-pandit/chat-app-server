@@ -99,3 +99,17 @@ exports.getUserByID = async (req, res) => {
         res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
+
+exports.getOtherUsers = async (req, res) => {
+    console.log("GetOtherUsers-req.params:- ", req.params);
+
+    await User.findAll({
+        where: { id: { [Op.notIn]: [req.params.id] } },
+        attributes: ["id", "Name", "Phone"]
+    }).then((data) => {
+        console.log("GetOtherUsers-data:- ", JSON.stringify(data));
+        res.send(data);
+    }).catch((err) => {
+        res.status(500).send({ error: err.message || "Something went wrong" });
+    });
+}

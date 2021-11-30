@@ -19,13 +19,13 @@ const connection = (client) => {
         console.log("MessageToBeSend:- ", msg);
 
         let messageToBeSave = {
-            Body: msg.body,
-            SenderID: msg.senderID,
-            ReceiverID: msg.receiverID
+            Body: msg.Body,
+            SenderID: msg.SenderID,
+            ReceiverID: msg.ReceiverID
         }
 
         await createChatMessage(messageToBeSave).then((data) => {
-            global.io.to(msg.receiverSocketID).emit("message", data);
+            global.io.to(msg.ReceiverSocketID).emit("message", data);
             console.log("CreateChatMessage-data:- ", JSON.stringify(data));
         }).catch((err) => {
             console.log("CreateChatMessage-err:- ", err);
