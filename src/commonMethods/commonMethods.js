@@ -18,9 +18,9 @@ async function updateConnectionBySocketID(socketid, data) {
 
 async function createChatMessage(msg) {
     return await ChatMessage.create({
-        Body: msg.body,
-        SenderID: msg.senderID,
-        ReceiverID: msg.receiverID,
+        Body: msg.Body,
+        SenderID: msg.SenderID,
+        ReceiverID: msg.ReceiverID,
         IsDeleted: false,
     })
 }

@@ -16,10 +16,16 @@ const connection = (client) => {
 
     // on message
     client.on("message", async (msg) => {
-        console.log("Message:- ", msg);
-        let socketid = await getSocketIDOfUser(msg.receiverID);
-        await createChatMessage(msg).then((data) => {
-            global.io.to(socketid).emit("message", data);
+        console.log("MessageToBeSend:- ", msg);
+
+        let messageToBeSave = {
+            Body: msg.body,
+            SenderID: msg.senderID,
+            ReceiverID: msg.receiverID
+        }
+
+        await createChatMessage(messageToBeSave).then((data) => {
+            global.io.to(msg.receiverSocketID).emit("message", data);
             console.log("CreateChatMessage-data:- ", JSON.stringify(data));
         }).catch((err) => {
             console.log("CreateChatMessage-err:- ", err);
