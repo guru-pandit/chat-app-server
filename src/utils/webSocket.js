@@ -17,7 +17,7 @@ const connection = (client) => {
     // on message
     client.on("message", async (msg) => {
         console.log("MessageToBeSend:- ", msg);
-
+        let sid = await getSocketIDOfUser(msg.ReceiverID);
         let messageToBeSave = {
             Body: msg.Body,
             SenderID: msg.SenderID,
@@ -25,7 +25,7 @@ const connection = (client) => {
         }
 
         await createChatMessage(messageToBeSave).then((data) => {
-            global.io.to(msg.ReceiverSocketID).emit("message", data);
+            global.io.to(sid).emit("message", data);
             console.log("CreateChatMessage-data:- ", JSON.stringify(data));
         }).catch((err) => {
             console.log("CreateChatMessage-err:- ", err);
