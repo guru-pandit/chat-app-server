@@ -21,7 +21,14 @@ async function createChatMessage(msg) {
         Body: msg.Body,
         SenderID: msg.SenderID,
         ReceiverID: msg.ReceiverID,
+        MessageSentAt: msg.MessageSentAt,
         IsDeleted: false,
+    })
+}
+
+async function updateMessage(mid, msg) {
+    return await ChatMessage.update(msg, {
+        where: { id: mid }
     })
 }
 
@@ -39,5 +46,6 @@ module.exports = {
     updateConnectionBySocketID,
     updateConnectionByUserID,
     createChatMessage,
-    getSocketIDOfUser
+    getSocketIDOfUser,
+    updateMessage
 }

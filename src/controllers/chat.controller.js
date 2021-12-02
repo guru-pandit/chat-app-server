@@ -9,6 +9,7 @@ exports.getPrivateChat = async (req, res) => {
             SenderId: { [Op.or]: [req.body.id1, req.body.id2] },
             ReceiverId: { [Op.or]: [req.body.id1, req.body.id2] }
         },
+        attributes: ["id", "Body", "SenderID", "ReceiverID", "IsReceived", "IsDeleted", "MessageSentAt", "MessageReceivedAt"],
         order: [['createdAt', 'ASC']]
     }).then((data) => {
         console.log("GetPrivateChat-data:- ", JSON.stringify(data));

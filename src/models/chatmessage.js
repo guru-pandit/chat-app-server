@@ -18,7 +18,9 @@ module.exports = (sequelize, DataTypes) => {
     SenderID: DataTypes.INTEGER,
     ReceiverID: DataTypes.INTEGER,
     IsReceived: DataTypes.BOOLEAN,
-    IsDeleted: DataTypes.BOOLEAN
+    IsDeleted: DataTypes.BOOLEAN,
+    MessageSentAt: DataTypes.DATE,
+    MessageReceivedAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'ChatMessage',

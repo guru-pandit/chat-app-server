@@ -1,4 +1,4 @@
-const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser } = require("../commonMethods/commonMethods");
+const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser, updateMessage } = require("../commonMethods/commonMethods");
 
 const connection = (client) => {
     console.log("ConnectedClientID:- ", client.id);
@@ -15,21 +15,29 @@ const connection = (client) => {
     })
 
     // on message
-    client.on("message", async (msg) => {
-        console.log("MessageToBeSend:- ", msg);
+    client.on("private message", async (msg) => {
+        console.log("PrivateMessageFromSender:- ", msg);
         let sid = await getSocketIDOfUser(msg.ReceiverID);
         let messageToBeSave = {
             Body: msg.Body,
             SenderID: msg.SenderID,
-            ReceiverID: msg.ReceiverID
+            ReceiverID: msg.ReceiverID,
+            MessageSentAt: msg.MessageSentAt
         }
 
         await createChatMessage(messageToBeSave).then((data) => {
-            global.io.to(sid).emit("message", data);
+            global.io.to(sid).emit("private message", data);
             console.log("CreateChatMessage-data:- ", JSON.stringify(data));
         }).catch((err) => {
             console.log("CreateChatMessage-err:- ", err);
         })
+    })
+
+    // Private message received
+    client.on("private message received", async (msg) => {
+        console.log("PrivateMessageReceived:- ", msg);
+        let msgToBeUpdate = { MessageReceivedAt: msg.MessageReceivedAt, IsReceived: true }
+        await updateMessage(msg.MsgID, msgToBeUpdate);
     })
 
 }
