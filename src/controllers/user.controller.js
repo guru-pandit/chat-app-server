@@ -83,12 +83,12 @@ exports.getUserByID = async (req, res) => {
     }).then(async (result) => {
         console.log("GetUserByID-result:- ", JSON.stringify(result));
         if (result != null) {
-            let socketid = await getSocketIDOfUser(result.id)
+            // let socketid = await getSocketIDOfUser(result.id)
             let responseBody = {
                 id: result.id,
                 name: result.Name,
                 phone: result.Phone,
-                socketID: socketid
+                // socketID: socketid
             }
             res.send(responseBody);
 
