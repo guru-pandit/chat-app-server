@@ -1,5 +1,11 @@
 const { ChatMessage } = require("../models");
 const { Op } = require("sequelize");
+const { createChatMessage } = require("../commonMethods/commonMethods");
+
+// Function to add messages
+exports.addMessage = async (req, res) => {
+    console.log("AddMessage-req.body:- ", req.body);
+}
 
 // Function to get the private chats
 exports.getPrivateChat = async (req, res) => {
