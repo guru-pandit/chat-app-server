@@ -1,4 +1,4 @@
-const { ConnectionDetail, ChatMessage } = require("../models");
+const { ConnectionDetail, ChatMessage, Conversation } = require("../models");
 
 async function createConnection(data) {
     return await ConnectionDetail.create(data);
@@ -41,11 +41,21 @@ async function getSocketIDOfUser(userid) {
     return socketid;
 }
 
+async function createNewConversation(members) {
+    return await Conversation.create({ Members: members });
+}
+
+async function getConversationById(cid) {
+    return await Conversation.findOne({ where: { id: cid } });
+}
+
 module.exports = {
     createConnection,
     updateConnectionBySocketID,
     updateConnectionByUserID,
     createChatMessage,
     getSocketIDOfUser,
-    updateMessage
+    updateMessage,
+    createNewConversation,
+    getConversationById
 }
