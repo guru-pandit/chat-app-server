@@ -3,10 +3,18 @@ const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 const { getSocketIDOfUser } = require("../commonMethods/commonMethods");
+const { validationResult } = require("express-validator");
 
 // Funtion to register the user
 exports.register = async (req, res) => {
     console.log("Register-Req.body:- ", req.body);
+
+    // validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array()[0].msg });
+    }
+
     // Checking user is already registered or not
     let isUserExist = await User.findOne({ where: { Phone: req.body.Phone, [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }], } })
     console.log("IsUserExist:- ", JSON.stringify(isUserExist));
@@ -36,6 +44,12 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     console.log("Login-Req.body:- ", req.body);
     console.log("Login-Req.cookies:- ", req.cookies);
+
+    // validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).send({ error: errors.array()[0].msg });
+    }
 
     await User.findOne({
         where: {
