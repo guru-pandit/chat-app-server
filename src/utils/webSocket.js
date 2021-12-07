@@ -14,32 +14,15 @@ const connection = (client) => {
         });
     })
 
-    // on message
+    // on private message message
     client.on("private message", async (msg) => {
         console.log("PrivateMessageFromSender:- ", msg);
         let sid = await getSocketIDOfUser(msg.ReceiverID);
-        let messageToBeSave = {
-            Body: msg.Body,
-            SenderID: msg.SenderID,
-            ReceiverID: msg.ReceiverID,
-            MessageSentAt: msg.MessageSentAt
-        }
-
-        await createChatMessage(messageToBeSave).then((data) => {
-            global.io.to(sid).emit("private message", data);
-            console.log("CreateChatMessage-data:- ", JSON.stringify(data));
-        }).catch((err) => {
-            console.log("CreateChatMessage-err:- ", err);
+        console.log("SID:- ", sid)
+        await createChatMessage(msg).then((res) => {
+            global.io.to(sid).emit("private message", res);
         })
     })
-
-    // Private message received
-    client.on("private message received", async (msg) => {
-        console.log("PrivateMessageReceived:- ", msg);
-        let msgToBeUpdate = { MessageReceivedAt: msg.MessageReceivedAt, IsReceived: true }
-        await updateMessage(msg.MsgID, msgToBeUpdate);
-    })
-
 }
 
 module.exports = { connection }

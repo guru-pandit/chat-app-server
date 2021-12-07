@@ -7,5 +7,5 @@ module.exports = (app) => {
     // Login route
     app.post("/user/login", userController.login);
     // get other users
-    app.get("/user/get-other/:id", userController.getOtherUsers);
+    app.post("/user/get-other", userController.getOtherUsers);
 }

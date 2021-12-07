@@ -1,4 +1,5 @@
 const { ConnectionDetail, ChatMessage, Conversation } = require("../models");
+const { Op } = require("sequelize");
 
 async function createConnection(data) {
     return await ConnectionDetail.create(data);
@@ -20,7 +21,7 @@ async function createChatMessage(msg) {
     return await ChatMessage.create({
         Body: msg.Body,
         SenderID: msg.SenderID,
-        ReceiverID: msg.ReceiverID,
+        ConversationID: msg.ConversationID,
         MessageSentAt: msg.MessageSentAt,
         IsDeleted: false,
     })
@@ -49,6 +50,18 @@ async function getConversationById(cid) {
     return await Conversation.findOne({ where: { id: cid } });
 }
 
+async function getConversationByUId() {
+    return await Conversation.findAll();
+}
+
+async function getConversations() {
+    return await Conversation.findAll();
+}
+
+async function getPrivateChatByConvId(cid) {
+    return await ChatMessage.findAll({ where: { ConversationID: cid } });
+}
+
 module.exports = {
     createConnection,
     updateConnectionBySocketID,
@@ -57,5 +70,8 @@ module.exports = {
     getSocketIDOfUser,
     updateMessage,
     createNewConversation,
-    getConversationById
+    getConversationById,
+    getConversationByUId,
+    getPrivateChatByConvId,
+    getConversations
 }

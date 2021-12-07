@@ -17,19 +17,19 @@ exports.setConnection = async (req, res) => {
 
         await createConnection(jsonBody).then((data) => {
             console.log("ConnectionCreate:- ", JSON.stringify(data));
-            res.send({ message: "Device connected..." });
+            return res.send({ message: "Device connected..." });
         }).catch((err) => {
             console.log("ConnectionCreate:- ", JSON.stringify(err));
-            res.status(400).send({ error: "Device connection failed..." });
+            return res.status(400).send({ error: "Device connection failed..." });
         });
     } else {
         let jsonBody = { SocketID: req.body.SocketID, IsConnected: true }
         await updateConnectionByUserID(req.body.UserID, jsonBody).then((data) => {
             console.log("ConnectionUpdate:- ", JSON.stringify(data));
-            res.send({ message: "Device connected..." });
+            return res.send({ message: "Device connected..." });
         }).catch((err) => {
             console.log("ConnectionUpdate-err:- ", err);
-            res.status(400).send({ error: "Device connection failed..." });
+            return res.status(400).send({ error: "Device connection failed..." });
         });
     }
 }

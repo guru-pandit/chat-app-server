@@ -86,30 +86,38 @@ exports.getUserByID = async (req, res) => {
             // let socketid = await getSocketIDOfUser(result.id)
             let responseBody = {
                 id: result.id,
-                name: result.Name,
-                phone: result.Phone,
-                // socketID: socketid
+                Name: result.Name,
+                Phone: result.Phone
             }
-            res.send(responseBody);
+            return res.send(responseBody);
 
         } else {
-            res.status(400).send({ error: "No user found..." });
+            return res.status(400).send({ error: "No user found..." });
         }
     }).catch((err) => {
-        res.status(500).send({ error: err.message || "Something went wrong" });
+        return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
 
+// Function to get other users
 exports.getOtherUsers = async (req, res) => {
-    console.log("GetOtherUsers-req.params:- ", req.params);
+    console.log("GetOtherUsers-req.body:- ", req.body);
 
-    await User.findAll({
-        where: { id: { [Op.notIn]: [req.params.id] } },
-        attributes: ["id", "Name", "Phone"]
-    }).then((data) => {
-        console.log("GetOtherUsers-data:- ", JSON.stringify(data));
-        res.send(data);
-    }).catch((err) => {
-        res.status(500).send({ error: err.message || "Something went wrong" });
-    });
+    if (req.body.search != "") {
+        User.findAll({
+            where: {
+                id: { [Op.notIn]: [req.body.userId] },
+                [Op.or]: [
+                    { Name: { [Op.like]: "%" + req.body.search + "%" } },
+                    { Phone: { [Op.like]: "%" + req.body.search + "%" } }
+                ]
+            }
+        }).then((response) => {
+            return res.send(response);
+        }).catch((err) => {
+            return res.status(500).send({ error: err.message || "Something went wrong" });
+        })
+    } else {
+        return res.send([]);
+    }
 }
