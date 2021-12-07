@@ -1,4 +1,4 @@
-const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser, updateMessage } = require("../commonMethods/commonMethods");
+const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser, getUserBySocketId } = require("../commonMethods/commonMethods");
 
 const connection = (client) => {
     console.log("ConnectedClientID:- ", client.id);
@@ -6,9 +6,11 @@ const connection = (client) => {
     // On disconnect
     client.on("disconnect", async () => {
         console.log("Disconnected...", client.id);
-        let jsonBody = { IsConnected: false }
-        await updateConnectionBySocketID(client.id, jsonBody).then((result) => {
+        let jsonBody = { IsConnected: false, DisconnectedAt: Date.now() }
+        await updateConnectionBySocketID(client.id, jsonBody).then(async (result) => {
             console.log("Disconnect-update:- ", result);
+            // let userid = await getUserBySocketId(client.id);
+            // global.io.emit("user disconnected", { UserID: userid });
         }).catch((err) => {
             console.log("Disconnect-err:- ", err);
         });

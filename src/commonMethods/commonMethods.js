@@ -33,6 +33,15 @@ async function updateMessage(mid, msg) {
     })
 }
 
+async function getUserBySocketId(sid) {
+    let userid;
+    await ConnectionDetail.findOne({ where: { SocketID: sid } }).then((result) => {
+        console.log("GetUserID-result:- ", JSON.stringify(result));
+        userid = result.UserID;
+    })
+    return userid;
+}
+
 async function getSocketIDOfUser(userid) {
     let socketid = ""
     await ConnectionDetail.findOne({ where: { UserID: userid } }).then((result) => {
@@ -73,5 +82,6 @@ module.exports = {
     getConversationById,
     getConversationByUId,
     getPrivateChatByConvId,
-    getConversations
+    getConversations,
+    getUserBySocketId
 }

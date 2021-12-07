@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { User, ConnectionDetail } = require("../models");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
@@ -79,17 +79,18 @@ exports.getUserByID = async (req, res) => {
         where: {
             id: req.params.id,
             [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }],
-        }
+        },
+        attributes: ["id", "Name", "Phone"],
+        include: { model: ConnectionDetail }
     }).then(async (result) => {
         console.log("GetUserByID-result:- ", JSON.stringify(result));
         if (result != null) {
-            // let socketid = await getSocketIDOfUser(result.id)
-            let responseBody = {
-                id: result.id,
-                Name: result.Name,
-                Phone: result.Phone
-            }
-            return res.send(responseBody);
+            // let responseBody = {
+            //     id: result.id,
+            //     Name: result.Name,
+            //     Phone: result.Phone
+            // }
+            return res.send(result);
 
         } else {
             return res.status(400).send({ error: "No user found..." });
