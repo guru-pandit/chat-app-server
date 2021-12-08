@@ -1,4 +1,4 @@
-const { ConnectionDetail, ChatMessage, Conversation } = require("../models");
+const { ConnectionDetail, ChatMessage, Conversation, User } = require("../models");
 const { Op } = require("sequelize");
 
 async function createConnection(data) {
@@ -31,6 +31,10 @@ async function updateMessage(mid, msg) {
     return await ChatMessage.update(msg, {
         where: { id: mid }
     })
+}
+
+async function getUserByPK(uid) {
+    return await User.findByPk(uid);
 }
 
 async function getUserBySocketId(sid) {
@@ -83,5 +87,6 @@ module.exports = {
     getConversationByUId,
     getPrivateChatByConvId,
     getConversations,
-    getUserBySocketId
+    getUserBySocketId,
+    getUserByPK
 }
