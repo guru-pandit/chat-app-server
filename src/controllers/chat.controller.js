@@ -1,6 +1,6 @@
 const { ChatMessage } = require("../models");
 const { Op } = require("sequelize");
-const { createChatMessage, getPrivateChatByConvId, updateMessage, getSocketIDOfUser } = require("../commonMethods/commonMethods");
+const { createChatMessage, getPrivateChatByConvId, updateMessage } = require("../commonMethods/commonMethods");
 
 // Function to add messages
 exports.addMessage = async (req, res) => {
@@ -33,14 +33,9 @@ exports.getPrivateChat = async (req, res) => {
 // Function to update msg
 exports.updateMessage = async (req, res) => {
     console.log("UpdateMessage-req.body:- ", req.body);
-    // console.log("UpdateMessage-req.params:- ", req.params);
-    updateMessage(req.params.messageID, { MessageReceivedAt: req.body.MessageReceivedAt, IsReceived: req.body.IsReceived, IsRead: req.body.IsRead }).then(async (response) => {
-        // console.log("UpdateMessage-res", response);
-
-        let sid = await getSocketIDOfUser(req.body.SenderID);
-        // console.log("UpdateMessage-sid:- ", sid);
-        global.io.to(sid).emit("receiver received private message", { ConversationID: req.body.ConversationID });
-
+    console.log("UpdateMessage-req.params:- ", req.params);
+    updateMessage(req.params.messageID, { MessageReceivedAt: req.body.MessageReceivedAt, IsReceived: true }).then((response) => {
+        console.log("UpdateMessage-res", response);
         return res.send({ message: "Message updated" });
     }).catch((err) => {
         console.log("UpdateMessage-err:- ", err);

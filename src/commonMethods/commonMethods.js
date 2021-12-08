@@ -24,19 +24,19 @@ async function createChatMessage(msg) {
         ConversationID: msg.ConversationID,
         MessageSentAt: msg.MessageSentAt,
         IsDeleted: false,
-        IsRead: false,
-        IsSaved: true
     })
 }
 
 async function updateMessage(mid, msg) {
-    return await ChatMessage.update(msg, { where: { id: mid } })
+    return await ChatMessage.update(msg, {
+        where: { id: mid }
+    })
 }
 
 async function getUserBySocketId(sid) {
     let userid;
     await ConnectionDetail.findOne({ where: { SocketID: sid } }).then((result) => {
-        // console.log("GetUserID-result:- ", JSON.stringify(result));
+        console.log("GetUserID-result:- ", JSON.stringify(result));
         userid = result.UserID;
     })
     return userid;
@@ -45,7 +45,7 @@ async function getUserBySocketId(sid) {
 async function getSocketIDOfUser(userid) {
     let socketid = ""
     await ConnectionDetail.findOne({ where: { UserID: userid } }).then((result) => {
-        // console.log("GetSocketID-result:- ", JSON.stringify(result));
+        console.log("GetSocketID-result:- ", JSON.stringify(result));
         socketid = result.SocketID;
     })
     return socketid;
