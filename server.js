@@ -1,18 +1,23 @@
 const express = require('express');
 const { createServer } = require('http');
 const cookieParser = require("cookie-parser");
+const path = require("path");
 const cors = require("cors");
-require("dotenv").config();
 const webSocket = require("./src/utils/webSocket");
+require("dotenv").config();
 
 const app = express();
 const httpServer = createServer(app);
 const { Server } = require("socket.io");
 
+global.__basedir = __dirname;
+
 // Middlewares
 app.use(cors({ origin: "*" }));
 app.use(cookieParser());
 app.use(express.json());
+const publicDir = path.join(__basedir, "./public");
+app.use(express.static(publicDir));
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello world</h1>');
