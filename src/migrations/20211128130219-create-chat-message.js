@@ -21,9 +21,11 @@ module.exports = {
       },
       IsReceived: {
         type: Sequelize.BOOLEAN,
+        defaultValue: false,
       },
       IsDeleted: {
         type: Sequelize.BOOLEAN,
+        defaultValue: false,
       },
       createdAt: {
         allowNull: false,
