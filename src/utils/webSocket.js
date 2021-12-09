@@ -19,10 +19,13 @@ const connection = (client) => {
     // on private message message
     client.on("private message", async (msg) => {
         console.log("PrivateMessageFromSender:- ", msg);
-        let sid = await getSocketIDOfUser(msg.ReceiverID);
-        console.log("SID:- ", sid)
+
+        let rsid = await getSocketIDOfUser(msg.ReceiverID);
+        let ssid = await getSocketIDOfUser(msg.SenderID);
+
         await createChatMessage(msg).then((res) => {
-            global.io.to(sid).emit("private message", res);
+            global.io.to(rsid).emit("private message", res);
+            global.io.to(ssid).emit("server received private message", { ConversationID: msg.ConversationID });
         })
     })
 }
