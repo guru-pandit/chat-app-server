@@ -67,11 +67,13 @@ exports.login = async (req, res) => {
             if (isPasswordMatch) {
                 let token = jwt.sign({ id: data.id }, process.env.JWT_SECRET_KEY);
                 // console.log("Auth-token:- ", token);
-
+                let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${data.id}/`
+                let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
                 let user = {
                     id: data.id,
                     Name: data.Name,
                     Phone: data.Phone,
+                    Avatar: data.Avatar != null ? imgUrl + data.Avatar : dummyImg,
                     authToken: token
                 }
 
