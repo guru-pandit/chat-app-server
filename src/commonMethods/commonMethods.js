@@ -1,22 +1,23 @@
 const { ConnectionDetail, ChatMessage, Conversation, User } = require("../models");
 const { Op } = require("sequelize");
 
+// Create new connetion details
 async function createConnection(data) {
     return await ConnectionDetail.create(data);
 }
-
+// Update the connection by user id
 async function updateConnectionByUserID(userid, data) {
     return await ConnectionDetail.update(data, {
         where: { UserID: userid }
     })
 }
-
+// Update the connection by socket id
 async function updateConnectionBySocketID(socketid, data) {
     return await ConnectionDetail.update(data, {
         where: { SocketID: socketid }
     })
 }
-
+// Create new message
 async function createChatMessage(msg) {
     return await ChatMessage.create({
         Body: msg.Body,
@@ -28,15 +29,15 @@ async function createChatMessage(msg) {
         IsSaved: true
     })
 }
-
-async function updateMessage(mid, msg) {
+// Update the message by message id
+async function updateMessageByMsgID(mid, msg) {
     return await ChatMessage.update(msg, { where: { id: mid } })
 }
-
+// Get user by primary key
 async function getUserByPK(uid) {
     return await User.findByPk(uid);
 }
-
+// Get user by socket id
 async function getUserBySocketId(sid) {
     let userid;
     await ConnectionDetail.findOne({ where: { SocketID: sid } }).then((result) => {
@@ -45,7 +46,7 @@ async function getUserBySocketId(sid) {
     })
     return userid;
 }
-
+// Get socket id of user
 async function getSocketIDOfUser(userid) {
     let socketid = ""
     await ConnectionDetail.findOne({ where: { UserID: userid } }).then((result) => {
@@ -54,23 +55,37 @@ async function getSocketIDOfUser(userid) {
     })
     return socketid;
 }
-
+// Create new conversation
 async function createNewConversation(members) {
     return await Conversation.create({ Members: members });
 }
-
+// Get conversation on conversation by conversation id
 async function getConversationById(cid) {
-    return await Conversation.findOne({ where: { id: cid } });
+    return await Conversation.findOne({
+        where: { id: cid },
+        include: [
+            {
+                model: ChatMessage,
+                where: {
+                    [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }]
+                }
+            }]
+    });
 }
 
+// // Get users conversations 
+// async function getAllConversationsOfUser() {
+//     return await Conversation.findAll()
+// }
+// Get conversation by user id
 async function getConversationByUId() {
     return await Conversation.findAll();
 }
-
+// Get conversations
 async function getConversations() {
     return await Conversation.findAll();
 }
-
+// Get private chat by conversation id
 async function getPrivateChatByConvId(cid) {
     return await ChatMessage.findAll({ where: { ConversationID: cid } });
 }
@@ -81,12 +96,13 @@ module.exports = {
     updateConnectionByUserID,
     createChatMessage,
     getSocketIDOfUser,
-    updateMessage,
+    updateMessageByMsgID,
     createNewConversation,
     getConversationById,
     getConversationByUId,
     getPrivateChatByConvId,
     getConversations,
     getUserBySocketId,
-    getUserByPK
+    getUserByPK,
+    getAllConversationsOfUser
 }

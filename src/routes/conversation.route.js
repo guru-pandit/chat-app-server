@@ -7,4 +7,6 @@ module.exports = (app) => {
     app.get("/get-conversation/:id", conversationController.getConversation);
     // get conversation
     app.get("/get-conversation-by-user/:id", conversationController.getConversationByUserId);
+    // get all conversations of user
+    app.get("/get-all-conversations/:id", conversationController.getConversationsOfUser);
 }

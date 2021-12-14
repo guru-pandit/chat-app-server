@@ -79,3 +79,13 @@ exports.getConversationByUserId = async (req, res) => {
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
+
+// Get all convesation details of user
+exports.getConversationsOfUser = async (req, res) => {
+    console.log("GetConversationsOfUser-req.parmas:- ", req.params);
+    getConversations().then((result) => {
+
+    }).catch((err) => {
+        return res.status(500).send({ error: err.message || "Something went wrong" });
+    });
+}

@@ -1,6 +1,6 @@
 const { ChatMessage } = require("../models");
 const { Op } = require("sequelize");
-const { createChatMessage, getPrivateChatByConvId, updateMessage, getSocketIDOfUser } = require("../commonMethods/commonMethods");
+const { createChatMessage, getPrivateChatByConvId, updateMessageByMsgID, getSocketIDOfUser } = require("../commonMethods/commonMethods");
 
 // Function to add messages
 exports.addMessage = async (req, res) => {
@@ -34,7 +34,7 @@ exports.getPrivateChat = async (req, res) => {
 exports.updateMessage = async (req, res) => {
     console.log("UpdateMessage-req.body:- ", req.body);
     // console.log("UpdateMessage-req.params:- ", req.params);
-    updateMessage(req.params.messageID, { MessageReceivedAt: req.body.MessageReceivedAt, IsReceived: req.body.IsReceived, IsRead: req.body.IsRead }).then(async (response) => {
+    updateMessageByMsgID(req.params.messageID, { MessageReceivedAt: req.body.MessageReceivedAt, IsReceived: req.body.IsReceived, IsRead: req.body.IsRead }).then(async (response) => {
         // console.log("UpdateMessage-res", response);
 
         let sid = await getSocketIDOfUser(req.body.SenderID);
