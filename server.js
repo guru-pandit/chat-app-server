@@ -3,8 +3,11 @@ const { createServer } = require('http');
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const cors = require("cors");
-const webSocket = require("./src/utils/webSocket");
 require("dotenv").config();
+
+const webSocket = require("./src/utils/webSocket");
+const logger = require("./src/utils/logger");
+const morgan = require("morgan");
 
 const app = express();
 const httpServer = createServer(app);
@@ -18,6 +21,9 @@ app.use(cookieParser());
 app.use(express.json());
 const publicDir = path.join(__basedir, "./public");
 app.use(express.static(publicDir));
+
+// Morgan Logger
+app.use(morgan("dev"));
 
 app.get('/', (req, res) => {
     res.send('<h1>Hello world</h1>');
@@ -39,5 +45,5 @@ global.io.on("connection", webSocket.connection);
 // Listening the server
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
-    console.log(`Server running on PORT:${PORT}`);
+    logger.info(`Server running on PORT: ${PORT}`);
 });

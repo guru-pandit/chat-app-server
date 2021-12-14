@@ -104,5 +104,4 @@ module.exports = {
     getConversations,
     getUserBySocketId,
     getUserByPK,
-    getAllConversationsOfUser
 }

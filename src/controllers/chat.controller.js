@@ -1,5 +1,7 @@
-const { ChatMessage } = require("../models");
 const { Op } = require("sequelize");
+
+const logger = require("../utils/logger");
+const { ChatMessage } = require("../models");
 const { createChatMessage, getPrivateChatByConvId, updateMessageByMsgID, getSocketIDOfUser } = require("../commonMethods/commonMethods");
 
 // Function to add messages
@@ -9,7 +11,7 @@ exports.addMessage = async (req, res) => {
         console.log("AddMessages-res:- ", response);
         return res.send(response);
     }).catch((err) => {
-        console.log("AddMessages-err:- ", err);
+        logger.error("AddMessages-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     })
 }
@@ -25,7 +27,7 @@ exports.getPrivateChat = async (req, res) => {
             return res.status(400).send({ error: "No chat found...." });
         }
     }).catch((err) => {
-        console.log("GetPrivateChat-err:- ", err);
+        logger.error("GetPrivateChat-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     })
 }
@@ -43,7 +45,7 @@ exports.updateMessage = async (req, res) => {
 
         return res.send({ message: "Message updated" });
     }).catch((err) => {
-        console.log("UpdateMessage-err:- ", err);
+        logger.error("UpdateMessage-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     })
 }

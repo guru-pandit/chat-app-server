@@ -1,11 +1,14 @@
-const { Conversation } = require("../models");
 const { Op } = require("sequelize");
+
+const logger = require("../utils/logger");
+const { Conversation } = require("../models");
 const { createNewConversation, getConversationById, getConversationByUId, getConversations } = require("../commonMethods/commonMethods");
 
 
 // Creating new conversation
 exports.createConversation = async (req, res) => {
     console.log("CreateConversation-req.body:- ", req.body);
+
     let members = [req.body.id1, req.body.id2]
 
     if (req.body.id1 == "" || req.body.id2 == "" || req.body.id1 == req.body.id2) {
@@ -13,6 +16,7 @@ exports.createConversation = async (req, res) => {
     } else {
         getConversations().then((response) => {
             // console.log("Conversations:-", JSON.stringify(response));
+
             if (response.length != 0) {
                 let conversation;
                 response.forEach((conv) => {
@@ -28,6 +32,7 @@ exports.createConversation = async (req, res) => {
                         // console.log("CreateConversation-res", JSON.stringify(response));
                         return res.send(response);
                     }).catch((err) => {
+                        logger.error("CreateConversation-error:- " + err.message);
                         return res.status(500).send({ error: err.message || "Something went wrong" });
                     });
                 }
@@ -36,6 +41,7 @@ exports.createConversation = async (req, res) => {
                     // console.log("CreateConversation-res", JSON.stringify(response));
                     return res.send(response);
                 }).catch((err) => {
+                    logger.error("CreateConversation-error:- " + err.message);
                     return res.status(500).send({ error: err.message || "Something went wrong" });
                 });
             }
@@ -54,6 +60,7 @@ exports.getConversation = async (req, res) => {
             return res.status(400).send({ error: "No conversation found..." });
         }
     }).catch((err) => {
+        logger.error("GetConversation-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
@@ -76,6 +83,7 @@ exports.getConversationByUserId = async (req, res) => {
             return res.status(400).send({ error: "No conversation found..." });
         }
     }).catch((err) => {
+        logger.error("GetConversation-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
@@ -86,6 +94,7 @@ exports.getConversationsOfUser = async (req, res) => {
     getConversations().then((result) => {
 
     }).catch((err) => {
+        logger.error("GetConversationsOfUser-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }

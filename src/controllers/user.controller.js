@@ -1,11 +1,13 @@
-const { User, ConnectionDetail } = require("../models");
 const fs = require("fs");
 const path = require("path");
 const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
+
+const { User, ConnectionDetail } = require("../models");
 const { getSocketIDOfUser, getUserByPK } = require("../commonMethods/commonMethods");
 const { validationResult } = require("express-validator");
+const logger = require("../utils/logger");
 
 // Funtion to register the user
 exports.register = async (req, res) => {
@@ -19,22 +21,20 @@ exports.register = async (req, res) => {
 
     // Checking user is already registered or not
     let isUserExist = await User.findOne({ where: { Phone: req.body.Phone, [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }], } })
-    console.log("IsUserExist:- ", JSON.stringify(isUserExist));
-    let user = {
-        Name: req.body.Name,
-        Phone: req.body.Phone
-    };
+    console.log("Register-IsUserExist:- ", JSON.stringify(isUserExist));
+
+    let user = { Name: req.body.Name, Phone: req.body.Phone };
     user.Password = await bcrypt.hashSync(req.body.Password, 8);
+    // console.log('Register-user :-' + JSON.stringify(user));
 
     // Creating the user in DB
-    console.log('Register-user :-' + JSON.stringify(user));
     if (isUserExist == null) {
         await User.create(user)
             .then(data => {
-                console.log('User data create:' + JSON.stringify(data));
+                console.log('Register-data:' + JSON.stringify(data));
                 return res.send({ data });
             }).catch(err => {
-                console.log('User data create-err:' + err);
+                logger.error('Register-error:' + err.message);
                 return res.status(500).send({ error: err.message || "Something Went wrong" });
             });
     } else {
@@ -44,15 +44,15 @@ exports.register = async (req, res) => {
 
 // Funtion to Login the user
 exports.login = async (req, res) => {
-    console.log("Login-Req.body:- ", req.body);
-    console.log("Login-Req.cookies:- ", req.cookies);
+    console.log("Login-Req.body:-", req.body);
+    console.log("Login-Req.cookies:-", req.cookies);
 
     // validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).send({ error: errors.array()[0].msg });
     }
-
+    // Finding user in DB
     await User.findOne({
         where: {
             Phone: req.body.Phone,
@@ -64,17 +64,16 @@ exports.login = async (req, res) => {
         if (data != null) {
             let isPasswordMatch = bcrypt.compareSync(req.body.Password, data.Password);
             console.log("Login-isPasswordMatch:-", isPasswordMatch);
+
             if (isPasswordMatch) {
                 let token = jwt.sign({ id: data.id }, process.env.JWT_SECRET_KEY);
-                // console.log("Auth-token:- ", token);
+
                 let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${data.id}/`
                 let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
+
                 let user = {
-                    id: data.id,
-                    Name: data.Name,
-                    Phone: data.Phone,
+                    id: data.id, Name: data.Name, Phone: data.Phone, authToken: token,
                     Avatar: data.Avatar != null ? imgUrl + data.Avatar : dummyImg,
-                    authToken: token
                 }
 
                 return res.send(user);
@@ -85,15 +84,15 @@ exports.login = async (req, res) => {
             return res.status(400).send({ error: "User not found....Please register" });
         }
     }).catch((err) => {
-        console.log("Login-err:- ", err);
+        logger.error("Login-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" })
     })
 }
 
 // function to upload profile image
 exports.uploadProfileImage = async (req, res) => {
-    // console.log("UploadProfileImage-req.file:- ", req.file);
-    // console.log("UploadProfileImage-req.params:- ", req.params);
+    console.log("UploadProfileImage-req.file:- ", req.file);
+    console.log("UploadProfileImage-req.params:- ", req.params);
 
     if (req.file == undefined) {
         res.status(400).send({ error: "Please select file to upload..." })
@@ -136,14 +135,14 @@ exports.uploadProfileImage = async (req, res) => {
                     })
                 }
             }).catch((err) => {
+                logger.error("UploadProfileImage-error:- " + err.message);
                 return res.status(500).send({ error: err.message || "Something went wrong" });
             });
         } else {
             return res.status(400).send({ error: "User not found...." });
         }
-
     } catch (err) {
-        console.log("UploadProfileImage-err:- ", err);
+        logger.error("UploadProfileImage-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" })
     }
 }
@@ -151,6 +150,7 @@ exports.uploadProfileImage = async (req, res) => {
 // Get user details from their ID
 exports.getUserByID = async (req, res) => {
     console.log("GetUserByID-req.params:- ", req.params);
+
     await User.findOne({
         where: {
             id: req.params.id,
@@ -160,9 +160,11 @@ exports.getUserByID = async (req, res) => {
         include: { model: ConnectionDetail }
     }).then(async (result) => {
         console.log("GetUserByID-result:- ", JSON.stringify(result));
+
         if (result != null) {
             let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${req.params.id}/`
             let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
+
             let responseBody = {
                 id: result.id,
                 Name: result.Name,
@@ -170,12 +172,14 @@ exports.getUserByID = async (req, res) => {
                 Avatar: result.Avatar != null ? imgUrl + result.Avatar : dummyImg,
                 ConnectionDetail: result.ConnectionDetail
             }
+
             return res.send(responseBody);
 
         } else {
             return res.status(400).send({ error: "No user found..." });
         }
     }).catch((err) => {
+        logger.error("GetUserByID-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }
@@ -196,6 +200,7 @@ exports.getOtherUsers = async (req, res) => {
         }).then((response) => {
             return res.send(response);
         }).catch((err) => {
+            logger.error("GetOtherUsers-error:- " + err.message);
             return res.status(500).send({ error: err.message || "Something went wrong" });
         })
     } else {

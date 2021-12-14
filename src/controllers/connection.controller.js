@@ -1,6 +1,8 @@
-const { ConnectionDetail } = require("../models");
-const { createConnection, updateConnectionByUserID } = require('./../commonMethods/commonMethods');
 const { Op } = require("sequelize");
+
+const logger = require("../utils/logger");
+const { createConnection, updateConnectionByUserID } = require('./../commonMethods/commonMethods');
+const { ConnectionDetail } = require("../models");
 
 // Function to save socket details in DB
 exports.setConnection = async (req, res) => {
@@ -19,7 +21,7 @@ exports.setConnection = async (req, res) => {
             console.log("ConnectionCreate:- ", JSON.stringify(data));
             return res.send({ message: "Device connected..." });
         }).catch((err) => {
-            console.log("ConnectionCreate:- ", JSON.stringify(err));
+            logger.error("ConnectionCreate-error:- " + err.message);
             return res.status(400).send({ error: "Device connection failed..." });
         });
     } else {
@@ -28,7 +30,7 @@ exports.setConnection = async (req, res) => {
             console.log("ConnectionUpdate:- ", JSON.stringify(data));
             return res.send({ message: "Device connected..." });
         }).catch((err) => {
-            console.log("ConnectionUpdate-err:- ", err);
+            logger.error("ConnectionUpdate-error:- " + err.message);
             return res.status(400).send({ error: "Device connection failed..." });
         });
     }
