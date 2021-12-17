@@ -1,5 +1,6 @@
-const { ConnectionDetail, ChatMessage, Conversation, User } = require("../models");
+const { ConnectionDetail, ChatMessage, Conversation, User, SessionData } = require("../models");
 const { Op } = require("sequelize");
+const logger = require("../utils/logger");
 
 // Create new connetion details
 async function createConnection(data) {
@@ -89,6 +90,15 @@ async function getConversations() {
 async function getPrivateChatByConvId(cid) {
     return await ChatMessage.findAll({ where: { ConversationID: cid } });
 }
+// -----------------------------------------------------
+// Saving token in the session data table
+async function saveToken(token) {
+    try {
+        await SessionData.create({ Token: token });
+    } catch (err) {
+        logger.error("SaveToken:- " + err.message)
+    }
+}
 
 module.exports = {
     createConnection,
@@ -104,4 +114,5 @@ module.exports = {
     getConversations,
     getUserBySocketId,
     getUserByPK,
+    saveToken,
 }

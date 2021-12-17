@@ -28,6 +28,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "babel-register": "^6.26.0",
     "sequelize-cli": "^6.3.0"
   }
 }

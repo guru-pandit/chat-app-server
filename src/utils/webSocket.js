@@ -3,7 +3,7 @@ const { updateConnectionBySocketID, createChatMessage, getSocketIDOfUser, getUse
 
 
 const connection = (client) => {
-    logger.warn("ConnectedClientID:- " + client.id);
+    logger.info("ConnectedClientID:- " + client.id);
 
     // On disconnect
     client.on("disconnect", async () => {

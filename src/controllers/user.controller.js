@@ -4,8 +4,8 @@ const { Op } = require("sequelize");
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 
-const { User, ConnectionDetail } = require("../models");
-const { getSocketIDOfUser, getUserByPK } = require("../commonMethods/commonMethods");
+const { User, ConnectionDetail, SessionData } = require("../models");
+const { getSocketIDOfUser, getUserByPK, saveToken } = require("../commonMethods/commonMethods");
 const { validationResult } = require("express-validator");
 const logger = require("../utils/logger");
 
@@ -45,7 +45,6 @@ exports.register = async (req, res) => {
 // Funtion to Login the user
 exports.login = async (req, res) => {
     console.log("Login-Req.body:-", req.body);
-    console.log("Login-Req.cookies:-", req.cookies);
 
     // validation errors
     const errors = validationResult(req);
@@ -58,7 +57,7 @@ exports.login = async (req, res) => {
             Phone: req.body.Phone,
             [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }],
         }
-    }).then((data) => {
+    }).then(async (data) => {
         console.log("Login-data:- ", JSON.stringify(data));
 
         if (data != null) {
@@ -67,10 +66,12 @@ exports.login = async (req, res) => {
 
             if (isPasswordMatch) {
                 let token = jwt.sign({ id: data.id }, process.env.JWT_SECRET_KEY);
-
+                //Saving token to the Session data
+                await saveToken(token);
+                // Image URLs
                 let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${data.id}/`
                 let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
-
+                // response object
                 let user = {
                     id: data.id, Name: data.Name, Phone: data.Phone, authToken: token,
                     Avatar: data.Avatar != null ? imgUrl + data.Avatar : dummyImg,
@@ -87,6 +88,25 @@ exports.login = async (req, res) => {
         logger.error("Login-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" })
     })
+}
+
+// Function to logout
+exports.logout = async (req, res) => {
+    let { authtoken } = req.headers;
+    console.log("Logout-token:- ", authtoken);
+
+    if (authtoken) {
+        SessionData.destroy({ where: { Token: authtoken } }).then((result) => {
+            console.log("Logout-result:- ", result);
+            res.send({ message: "Successfully logged out..." });
+        }).catch((err) => {
+            logger.error('Logout-error:' + err.message);
+            return res.status(500).send({ error: err.message || "Something Went wrong" });
+        });
+    } else {
+        res.status(400).send({ error: "No token provided..." })
+    }
+
 }
 
 // function to upload profile image

@@ -25,15 +25,9 @@ app.use(express.static(publicDir));
 // Morgan Logger
 app.use(morgan("dev"));
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hello world</h1>');
-});
-
 // Syncing the database
 const db = require("./src/models");
-db.sequelize.sync({
-    logging: false
-});
+db.sequelize.sync({ logging: false }).then((result) => logger.info("Succesfully connected to DB:- " + result.config.database)).catch((err) => logger.error(err.message))
 
 // Importing routes
 require("./src/routes")(app);
