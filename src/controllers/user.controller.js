@@ -92,7 +92,8 @@ exports.login = async (req, res) => {
 
 // Function to logout
 exports.logout = async (req, res) => {
-    let { authtoken } = req.headers;
+    console.log("Logout-headers:- ", JSON.stringify(req.headers));
+    let authtoken = req.headers["authorization"].split(" ")[1]
     console.log("Logout-token:- ", authtoken);
 
     if (authtoken) {

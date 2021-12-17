@@ -32,8 +32,8 @@ async function auth(req, res, next) {
 
 // Check JWT
 async function checkJWT(req, res, next) {
-    let { authtoken } = req.headers;
-    console.log("CheckJWTMiddleware:- ", authtoken);
+    let authtoken = req.headers["authorization"].split(" ")[1]
+    console.log("CheckJWTMiddleware-headers:- ", authtoken);
 
     if (authtoken) {
         SessionData.findOne({ where: { Token: authtoken } }).then(async (result) => {
