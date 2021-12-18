@@ -4,8 +4,8 @@ const { User, SessionData } = require("../models");
 const logger = require("../utils/logger");
 
 async function auth(req, res, next) {
-    let { authtoken } = req.headers;
-    console.log("AuthMiddleware:- ", authtoken);
+    let authtoken = req.headers["authorization"].split(" ")[1]
+    console.log("AuthMiddleware-headers:- ", authtoken);
 
     if (authtoken == null || authtoken == undefined || authtoken == "") {
         res.status(400).send({ error: "No token found please login..." })

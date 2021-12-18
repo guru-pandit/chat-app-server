@@ -9,6 +9,27 @@ const { getSocketIDOfUser, getUserByPK, saveToken } = require("../commonMethods/
 const { validationResult } = require("express-validator");
 const logger = require("../utils/logger");
 
+// Function for homepage
+exports.home = async (req, res) => {
+    console.log("Home-user:- ", JSON.stringify(req.user));
+    let authtoken = req.headers["authorization"].split(" ")[1]
+
+    if (req.user) {
+        let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${req.user.id}/`;
+        let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`;
+
+        let user = {
+            id: req.user.id, Name: req.user.Name, Phone: req.user.Phone, authToken: authtoken,
+            Avatar: req.user.Avatar != null ? imgUrl + req.user.Avatar : dummyImg,
+        }
+
+        res.send(user);
+    } else {
+        res.status(400).send({ error: "Please log into your account.." });
+    }
+
+}
+
 // Funtion to register the user
 exports.register = async (req, res) => {
     console.log("Register-Req.body:- ", req.body);
