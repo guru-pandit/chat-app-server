@@ -7,4 +7,6 @@ module.exports = (app) => {
     app.get("/chat/private-chat/:conversationID", chatController.getPrivateChat);
     // get private chat
     app.put("/chat/private-chat/:messageID", chatController.updateMessage);
+    // get private chat
+    app.put("/chat/private-chat-read/:conversationID", chatController.updateMessageRead);
 }

@@ -1,8 +1,9 @@
 const { Op } = require("sequelize");
+const _ = require("lodash");
 
 const logger = require("../utils/logger");
-const { Conversation } = require("../models");
-const { createNewConversation, getConversationById, getConversationByUId, getConversations } = require("../commonMethods/commonMethods");
+const { Conversation, ChatMessage } = require("../models");
+const { createNewConversation, getConversationById, getConversationByUId, getConversations, getPrivateChatByConvId } = require("../commonMethods/commonMethods");
 
 
 // Creating new conversation
@@ -90,11 +91,61 @@ exports.getConversationByUserId = async (req, res) => {
 
 // Get all convesation details of user
 exports.getConversationsOfUser = async (req, res) => {
-    console.log("GetConversationsOfUser-req.parmas:- ", req.params);
-    getConversations().then((result) => {
+    console.log("GetConversationsOfUser-req.paramas:- ", req.params);
+    await getConversations().then(async (result) => {
+        let convArray = getConvArray(result, req.params.id);
+        if (convArray.length != 0) {
+            let lm = await getLastMessages(convArray);
+            let lastMsgArray = _.orderBy(lm, ["MessageSentAt"], ["desc"]);
 
+            let convs = [];
+            await Promise.all(
+                lastMsgArray.map(async (msg) => {
+                    await getConversationById(msg.ConversationID).then((result) => {
+                        convs.push(result)
+                    }).catch((err) => {
+                        logger.error("GetConversationsOfUser-error:- " + err.message);
+                        return res.status(500).send({ error: err.message || "Something went wrong" });
+                    });
+                })
+            )
+            res.send(convs);
+        } else {
+            return res.status(400).send({ error: "No conversation found" });
+        }
     }).catch((err) => {
         logger.error("GetConversationsOfUser-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
+}
+
+function getConvArray(data, uid) {
+    let convArray = [];
+    if (data.length != 0) {
+        data.map((conv) => {
+            if (conv.Members.includes(uid)) {
+                convArray.push(conv.id);
+            }
+        })
+        return convArray;
+    } else {
+        return convArray;
+    }
+}
+
+async function getLastMessages(convArr) {
+    let lastMsgArray = [];
+    await Promise.all(
+        convArr.map(async (cid) => {
+            await ChatMessage.findAll({
+                limit: 1,
+                where: { ConversationID: cid, [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }] },
+                order: [['MessageSentAt', 'DESC']]
+            }).then((result) => {
+                lastMsgArray.push(result[0]);
+            }).catch((err) => {
+                logger.error("GetLastMessages-error:- " + err.message);
+            });
+        }))
+    return lastMsgArray
 }

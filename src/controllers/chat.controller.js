@@ -49,3 +49,23 @@ exports.updateMessage = async (req, res) => {
         return res.status(500).send({ error: err.message || "Something went wrong" });
     })
 }
+
+// Function to update the message - message received update
+// Update IsRead flag
+exports.updateMessageRead = async (req, res) => {
+    console.log("UpdateMessageRead-req.body:- ", req.params);
+
+    ChatMessage.update({ IsRead: true }, {
+        where: {
+            ConversationID: req.params.conversationID,
+            [Op.or]: [{ IsRead: false }, { IsRead: null }],
+            [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }]
+        }
+    }
+    ).then((result) => {
+        res.send(result)
+    }).catch((err) => {
+        logger.error("UpdateMessage-error:- " + err.message);
+        return res.status(500).send({ error: err.message || "Something went wrong" });
+    });
+}
