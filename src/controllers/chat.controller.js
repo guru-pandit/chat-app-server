@@ -65,7 +65,7 @@ exports.updateMessageRead = async (req, res) => {
     ).then((result) => {
         res.send(result)
     }).catch((err) => {
-        logger.error("UpdateMessage-error:- " + err.message);
+        logger.error("UpdateMessageRead-error:- " + err.message);
         return res.status(500).send({ error: err.message || "Something went wrong" });
     });
 }

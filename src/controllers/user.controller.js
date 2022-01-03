@@ -19,8 +19,8 @@ exports.home = async (req, res) => {
         let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`;
 
         let user = {
-            id: req.user.id, Name: req.user.Name, Phone: req.user.Phone, authToken: authtoken,
-            Avatar: req.user.Avatar != null ? imgUrl + req.user.Avatar : dummyImg,
+            id: req.user.id, Name: req.user.Name, Phone: req.user.Phone, Email: req.user.Email, authToken: authtoken,
+            DOB: req.user.DOB, Avatar: req.user.Avatar != null ? imgUrl + req.user.Avatar : dummyImg,
         }
 
         res.send(user);
@@ -94,8 +94,8 @@ exports.login = async (req, res) => {
                 let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
                 // response object
                 let user = {
-                    id: data.id, Name: data.Name, Phone: data.Phone, authToken: token,
-                    Avatar: data.Avatar != null ? imgUrl + data.Avatar : dummyImg,
+                    id: data.id, Name: data.Name, Phone: data.Phone, Email: data.Email, authToken: token,
+                    DOB: data.DOB, Avatar: data.Avatar != null ? imgUrl + data.Avatar : dummyImg,
                 }
 
                 return res.send(user);
@@ -189,6 +189,51 @@ exports.uploadProfileImage = async (req, res) => {
     }
 }
 
+// Update user information
+exports.updateUserProfile = async (req, res) => {
+    console.log("UploadProfileImage-req.body:- ", req.body);
+
+    // validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.status(400).send({ error: errors.array()[0].msg });
+        return;
+    }
+
+    // Checking phone is already registered with another user or not
+    let isNumberAlreadyRegistered = await User.findOne({
+        where:
+        {
+            id: { [Op.ne]: req.body.id },
+            Phone: req.body.Phone,
+            [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }],
+        }
+    })
+    console.log("Update-isNumberAlreadyRegistered:- ", JSON.stringify(isNumberAlreadyRegistered));
+    // If number already registered with another user then return error
+    if (isNumberAlreadyRegistered != null) {
+        res.status(400).send({ error: "Number already registered with another user" })
+        return;
+    }
+
+    let jsonBody = {
+        Name: req.body.Name,
+        Phone: req.body.Phone,
+        Email: req.body.Email,
+        DOB: req.body.DOB,
+    }
+
+    // // update user info
+    await User.update(jsonBody, {
+        where: { id: req.body.id }
+    }).then((result) => {
+        res.send(result)
+    }).catch((err) => {
+        logger.error("UpdateProfile-error:- " + err.message);
+        return res.status(500).send({ error: err.message || "Something went wrong" })
+    });
+}
+
 // Get user details from their ID
 exports.getUserByID = async (req, res) => {
     console.log("GetUserByID-req.params:- ", req.params);
@@ -211,6 +256,8 @@ exports.getUserByID = async (req, res) => {
                 id: result.id,
                 Name: result.Name,
                 Phone: result.Phone,
+                Email: result.Email,
+                DOB: result.DOB,
                 Avatar: result.Avatar != null ? imgUrl + result.Avatar : dummyImg,
                 ConnectionDetail: result.ConnectionDetail
             }
