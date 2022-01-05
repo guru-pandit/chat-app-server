@@ -2,8 +2,8 @@ const { Op } = require("sequelize");
 const _ = require("lodash");
 
 const logger = require("../utils/logger");
-const { Conversation, ChatMessage } = require("../models");
-const { createNewConversation, getConversationById, getConversationByUId, getConversations, getPrivateChatByConvId } = require("../commonMethods/commonMethods");
+const { Conversation, ChatMessage, User } = require("../models");
+const { createNewConversation, getConversationById, getConversationByUId, getConversations, getPrivateChatByConvId, getFriendsIDsOfUser } = require("../commonMethods/commonMethods");
 
 
 // Creating new conversation
@@ -69,7 +69,7 @@ exports.getConversation = async (req, res) => {
 // Get conversation by user id
 exports.getConversationByUserId = async (req, res) => {
     console.log("GetConversation-req.params:- ", req.params);
-    await getConversationByUId().then((response) => {
+    await getConversations().then((response) => {
         // console.log("GetConversation-res", response);
         if (response.length != 0) {
             let convArray = []
@@ -148,4 +148,68 @@ async function getLastMessages(convArr) {
             });
         }))
     return lastMsgArray
+}
+
+// get all friends
+exports.getAllFriends = async (req, res) => {
+    console.log("GetAllFriends-req.body:- ", req.params);
+    try {
+        let friendsIds = await getFriendsIDsOfUser(req.params.userID);
+
+        let dummyImg = `${req.protocol}://${req.headers.host}/uploads/images/avatar.png`
+
+        User.findAll({
+            where: {
+                id: { [Op.in]: friendsIds }
+            },
+            attributes: ["id", "Name", "Phone", "Email", "Avatar", "DOB"]
+        }).then(async (response) => {
+            let jsonRes = []
+            await Promise.all(response.map(async (f) => {
+                let imgUrl = `${req.protocol}://${req.headers.host}/uploads/avatars/${f.id}/`;
+
+                let friend = {
+                    id: f.id,
+                    Name: f.Name,
+                    Phone: f.Phone,
+                    Email: f.Email,
+                    Avatar: f.Avatar != null ? imgUrl + f.Avatar : dummyImg,
+                    DOB: f.DOB,
+                    LastMessage: null
+                }
+
+                let lm = await getLastMessageOfUsers(req.params.userID, friend.id);
+                friend.LastMessage = lm[0].ChatMessages;
+                jsonRes.push(friend);
+            }))
+
+            return res.send(jsonRes);
+        }).catch((err) => {
+            logger.error("GetAllFriends-error:- " + err.message);
+            return res.status(500).send({ error: err.message || "Something went wrong" });
+        });
+    } catch (err) {
+        logger.error("GetAllFriends-error:- " + err.message);
+        return res.status(500).send({ error: err.message || "Something went wrong" });
+    }
+}
+// function to get the last messages between the users
+async function getLastMessageOfUsers(uid, fid) {
+    console.log("getLastMessageOfUsers:- uid: " + uid + " fid: " + fid)
+    try {
+        let allConvs = await getConversationByUId(uid);
+        let convs = [];
+        if (allConvs.length != 0) {
+            allConvs.forEach((c) => {
+                if (c.Members.includes(uid.toString()) && c.Members.includes(fid.toString())) {
+                    convs.push(c)
+                }
+            })
+            return convs;
+        } else {
+            return convs;
+        }
+    } catch (err) {
+        logger.error("GetLastMessageOfUsers-error:- " + err.message);
+    }
 }

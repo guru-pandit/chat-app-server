@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 
 const { User, ConnectionDetail, SessionData } = require("../models");
-const { getSocketIDOfUser, getUserByPK, saveToken } = require("../commonMethods/commonMethods");
+const { getSocketIDOfUser, getUserByPK, saveToken, getFriendsIDsOfUser } = require("../commonMethods/commonMethods");
 const { validationResult } = require("express-validator");
 const logger = require("../utils/logger");
 

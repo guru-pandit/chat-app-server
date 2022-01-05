@@ -1,5 +1,6 @@
-const { ConnectionDetail, ChatMessage, Conversation, User, SessionData } = require("../models");
 const { Op } = require("sequelize");
+
+const { ConnectionDetail, ChatMessage, Conversation, User, SessionData } = require("../models");
 const logger = require("../utils/logger");
 
 // Create new connetion details
@@ -79,12 +80,47 @@ async function getConversationById(cid) {
 //     return await Conversation.findAll()
 // }
 // Get conversation by user id
-async function getConversationByUId() {
-    return await Conversation.findAll();
+async function getConversationByUId(uid) {
+    let convs = []
+    return await Conversation.findAll({
+        include: [
+            {
+                model: ChatMessage,
+                limit: 1,
+                where: {
+                    [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }]
+                },
+                order: [['MessageSentAt', 'DESC']]
+            }
+        ]
+    }).then((response) => {
+        return response;
+    }).catch((err) => {
+        logger.error("GetConversationByUId-error:- " + err.message);
+    });
 }
 // Get conversations
 async function getConversations() {
     return await Conversation.findAll();
+}
+// Get conversations
+async function getFriendsIDsOfUser(uid) {
+    let friendsIds = [];
+    return await Conversation.findAll().then((response) => {
+        if (response.length != 0) {
+
+            response.forEach((conv) => {
+                if (conv.Members.includes(uid.toString())) {
+                    let fid = conv.Members.find((f) => f != uid)
+                    friendsIds.push(fid);
+                }
+            })
+
+            return friendsIds;
+        } else {
+            return friendsIds;
+        }
+    })
 }
 // Get private chat by conversation id
 async function getPrivateChatByConvId(cid) {
@@ -115,4 +151,5 @@ module.exports = {
     getUserBySocketId,
     getUserByPK,
     saveToken,
+    getFriendsIDsOfUser
 }
