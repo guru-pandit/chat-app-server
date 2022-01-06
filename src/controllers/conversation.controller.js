@@ -2,7 +2,7 @@ const { Op } = require("sequelize");
 const _ = require("lodash");
 
 const logger = require("../utils/logger");
-const { Conversation, ChatMessage, User } = require("../models");
+const { Conversation, ChatMessage, User, ConnectionDetail } = require("../models");
 const { createNewConversation, getConversationById, getConversationByUId, getConversations, getPrivateChatByConvId, getFriendsIDsOfUser } = require("../commonMethods/commonMethods");
 
 
@@ -162,6 +162,7 @@ exports.getAllFriends = async (req, res) => {
             where: {
                 id: { [Op.in]: friendsIds }
             },
+            include: { model: ConnectionDetail },
             attributes: ["id", "Name", "Phone", "Email", "Avatar", "DOB"]
         }).then(async (response) => {
             let jsonRes = []
@@ -175,11 +176,17 @@ exports.getAllFriends = async (req, res) => {
                     Email: f.Email,
                     Avatar: f.Avatar != null ? imgUrl + f.Avatar : dummyImg,
                     DOB: f.DOB,
+                    ConnectionDetail: f.ConnectionDetail,
+                    ConversationID: null,
+                    ConversationMembers: null,
                     LastMessage: null
                 }
 
-                let lm = await getLastMessageOfUsers(req.params.userID, friend.id);
-                friend.LastMessage = lm[0].ChatMessages;
+                let lastConv = await getLastMessageOfUsers(req.params.userID, friend.id);
+                console.log("GetAllFriends-lastConv:- ", JSON.stringify(lastConv));
+                friend.ConversationID = lastConv[0].id;
+                friend.ConversationMembers = lastConv[0].Members;
+                friend.LastMessage = lastConv[0].ChatMessages;
                 jsonRes.push(friend);
             }))
 
