@@ -1,4 +1,6 @@
 'use strict';
+const moment = require("moment");
+
 const {
   Model
 } = require('sequelize');
@@ -23,6 +25,12 @@ module.exports = (sequelize, DataTypes) => {
     MessageReceivedAt: DataTypes.DATE,
     IsRead: DataTypes.BOOLEAN,
     IsSaved: DataTypes.BOOLEAN,
+    GroupDate: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return `${moment(this.MessageSentAt).format('D MMMM YYYY')}`;
+      },
+    }
   }, {
     sequelize,
     modelName: 'ChatMessage',
