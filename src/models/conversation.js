@@ -14,7 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Conversation.init({
-    Members: DataTypes.JSON
+    Members: DataTypes.JSON,
+    IsDeleted: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'Conversation',

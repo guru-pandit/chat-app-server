@@ -176,6 +176,8 @@ exports.getAllFriends = async (req, res) => {
                     Email: f.Email,
                     Avatar: f.Avatar != null ? imgUrl + f.Avatar : dummyImg,
                     DOB: f.DOB,
+                    IsConnected: f.ConnectionDetail.IsConnected,
+                    DisconnectedAt: f.ConnectionDetail.DisconnectedAt,
                     ConnectionDetail: f.ConnectionDetail,
                     ConversationID: null,
                     ConversationMembers: null,

@@ -2,13 +2,13 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const tableDefinition = await queryInterface.describeTable('Users');
+    const tableDefinition = await queryInterface.describeTable('Conversations');
     const promises = [];
 
-    if (!tableDefinition.DOB) {
-      promises.push(queryInterface.addColumn('Users', 'DOB',
+    if (!tableDefinition.IsDeleted) {
+      promises.push(queryInterface.addColumn('Conversations', 'IsDeleted',
         {
-          type: Sequelize.STRING(15),
+          type: Sequelize.BOOLEAN,
         },
       ));
     }

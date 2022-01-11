@@ -41,10 +41,14 @@ async function getUserByPK(uid) {
 }
 // Get user by socket id
 async function getUserBySocketId(sid) {
-    let userid;
+    let userid = 0;
     await ConnectionDetail.findOne({ where: { SocketID: sid } }).then((result) => {
         // console.log("GetUserID-result:- ", JSON.stringify(result));
-        userid = result.UserID;
+        if (result) {
+            userid = result.UserID;
+        } else {
+            return userid;
+        }
     })
     return userid;
 }
@@ -136,6 +140,52 @@ async function saveToken(token) {
     }
 }
 
+// ------------------------------------------------------
+// Get socket ids of friends which are conneted/online
+// Returns array
+async function getSocketIdsOfFriends(uid) {
+    let sids = [];
+    let fids = await getIdsOfFriends(uid);
+    if (fids.length != 0) {
+        return await ConnectionDetail.findAll({
+            where: {
+                UserID: { [Op.in]: fids },
+                IsConnected: true
+            }
+        }).then((response) => {
+            response.forEach((s) => {
+                sids.push(s.SocketID);
+            })
+            return sids;
+        }).catch((err) => {
+            console.log("GetSocketIdsOfFriends-err:- ", JSON.stringify(err.message));
+        });
+    } else {
+        return sids;
+    }
+}
+// Get ids of friends
+// Returns array
+async function getIdsOfFriends(uid) {
+    let ids = []
+    return Conversation.findAll({
+        where: {
+            [Op.or]: [{ IsDeleted: false }, { IsDeleted: null }]
+        },
+        attributes: ["id", "Members"]
+    }).then((response) => {
+        response.forEach((conv) => {
+            if (conv.Members.includes(uid.toString())) {
+                let fid = conv.Members.filter(m => m != uid)[0]
+                ids.push(parseInt(fid));
+            }
+        })
+        return ids;
+    }).catch((err) => {
+        console.log("GetIdsOfFriends-err:- ", JSON.stringify(err.message));
+    });
+}
+
 module.exports = {
     createConnection,
     updateConnectionBySocketID,
@@ -151,5 +201,6 @@ module.exports = {
     getUserBySocketId,
     getUserByPK,
     saveToken,
-    getFriendsIDsOfUser
+    getFriendsIDsOfUser,
+    getSocketIdsOfFriends
 }
